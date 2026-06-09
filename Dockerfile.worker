@@ -1,0 +1,18 @@
+# Worker service — runs the BullMQ workers on AWS ECS Fargate
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install ffmpeg for video frame extraction
+RUN apk add --no-cache ffmpeg
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY prisma ./prisma
+RUN npx prisma generate
+
+COPY lib ./lib
+COPY workers ./workers
+
+CMD ["node", "workers/index.js"]
